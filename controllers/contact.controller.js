@@ -48,10 +48,7 @@ async function updateContacts(req, res, next) {
 async function updateStatusContact(req, res, next) {
   const { contactId } = req.params;
   const body = req.body;
-  if (!body) {
-    return res.status(400).json({ message: "missing field favorite" });
-
-     }
+  
   const contact = await Contacts.findByIdAndUpdate(contactId, body, {
     new: true,
   });
