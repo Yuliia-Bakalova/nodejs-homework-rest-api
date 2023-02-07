@@ -4,7 +4,7 @@ const {
   login,
   current,
   logout,
-  subscriptionStatusUpdate,
+  subscriptionUpdate,
 } = require("../../controllers/user.controller");
 const { validateBody, auth } = require("../../middlewares");
 const { tryCatchWrapper } = require("../../helpers/index");
@@ -23,7 +23,7 @@ authRouter.patch(
   "/",
   auth,
   validateBody(updateSubscriptionSchema),
-  tryCatchWrapper(subscriptionStatusUpdate)
+  tryCatchWrapper(subscriptionUpdate)
 );
 
 module.exports = {

@@ -64,39 +64,64 @@ async function logout(req, res, next) {
     res.status(204).json();
 }
 
-async function subscriptionStatusUpdate(req, res, next) {
-  const body = req.body;
-  const subscription = body.subscription;
-  const { _id, email } = req.user;
 
+  
+
+//   async function subscriptionUpdate(req, res, next) {
+//     const { subscription } = req.body;
+//     const { _id, email } = req.user;
+//     const types = ["starter", "pro", "business"];
+//     if (types.includes(subscription) ) {
+//       const updatedSubscription = await Users.findByIdAndUpdate(_id,
+//         { subscription: subscription },
+//         { new: true, });
+//     }
+      
+//       if (!updatedSubscription) {
+//         return res.status(404).json({
+//           message: "Not found",
+//         });
+//       }
+
+//       res.status(200).json({
+//         user: {
+//           email,
+//           subscription: updatedSubscription.subscription,
+//         },
+//       });
+
+   
+// }
+  
+
+async function subscriptionUpdate(req, res, next) {
+  const { subscription } = req.body;
+  const { _id, email } = req.user;
   const types = ["starter", "pro", "business"];
-  for (const type of types) {
-    if (subscription === type) {
-      const updatedSubscription = await Users.findByIdAndUpdate(_id, body, {
-        new: true,
-      });
-      if (!updatedSubscription) {
-        return res.status(404).json({
-          message: "Not found",
+    if (types.includes(subscription)) {
+        const updatedSubscription = await Users.findByIdAndUpdate(_id,
+            { subscription: subscription },
+            { new: true, });
+        if (!updatedSubscription) {
+            return res.status(404).json({
+                message: "Not found",
+            });
+        }
+
+        res.status(200).json({
+            user: {
+                email,
+                subscription: updatedSubscription.subscription,
+            },
         });
-      }
-      return res.status(200).json({
-        user: {
-          email,
-          subscription: updatedSubscription.subscription,
-        },
-      });
-    }
   }
-  return res
-    .status(404)
-    .json({ message: "This type of subscription does not exist. Try again" });
+ 
 }
 
-module.exports = {
-  register,
-  login,
-  current,
-  logout,
-  subscriptionStatusUpdate,
-};
+  module.exports = {
+    register,
+    login,
+    current,
+    logout,
+    subscriptionUpdate
+  };
