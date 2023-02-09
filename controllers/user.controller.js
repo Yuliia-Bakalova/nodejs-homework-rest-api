@@ -1,16 +1,21 @@
 const { Users } = require("../models/users");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const path = require("path");
+const fs = require("fs/promises");
+const gravatar = require("gravatar");
+const { JWT_SECRET } = process.env;
 
 async function register(req, res, next) {
   const { email, password } = req.body;
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(password, salt);
-
+  const avatar = gravatar.url(email, { protocol: "http" });
   try {
     const savedUser = await Users.create({
       email,
       password: hashedPassword,
+      avatarURL: avatar,
     });
     res.status(201).json({
       user: {
@@ -36,7 +41,7 @@ async function login(req, res, next) {
   if (!isPasswordValid) {
     return res.status(401).json({ message: "Email or password is wrong" });
   }
-  const token = jwt.sign({ id: existedUser._id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ id: existedUser._id }, JWT_SECRET, {
     expiresIn: "1h",
   });
   return res.status(200).json({
@@ -64,36 +69,6 @@ async function logout(req, res, next) {
     res.status(204).json();
 }
 
-
-  
-
-//   async function subscriptionUpdate(req, res, next) {
-//     const { subscription } = req.body;
-//     const { _id, email } = req.user;
-//     const types = ["starter", "pro", "business"];
-//     if (types.includes(subscription) ) {
-//       const updatedSubscription = await Users.findByIdAndUpdate(_id,
-//         { subscription: subscription },
-//         { new: true, });
-//     }
-      
-//       if (!updatedSubscription) {
-//         return res.status(404).json({
-//           message: "Not found",
-//         });
-//       }
-
-//       res.status(200).json({
-//         user: {
-//           email,
-//           subscription: updatedSubscription.subscription,
-//         },
-//       });
-
-   
-// }
-  
-
 async function subscriptionUpdate(req, res, next) {
   const { subscription } = req.body;
   const { _id, email } = req.user;
@@ -118,10 +93,35 @@ async function subscriptionUpdate(req, res, next) {
  
 }
 
+async function updateAvatar(req, res, next) {
+  const { originalname } = req.file;
+  const tmpPath = path.resolve(__dirname, "../tmp", originalname);
+  const publicPath = path.resolve(__dirname, "../public/avatars", originalname);
+  const { _id } = req.user;
+
+  try {
+    await fs.rename(tmpPath, publicPath);
+    const user = await Users.findByIdAndUpdate(
+      _id,
+      { avatarURL: `/avatars/${originalname}` },
+      { new: true }
+    );
+    if (!user) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    return res.status(200).json({ avatarURL: `/avatars/${originalname}` });
+  } catch (error) {
+    await fs.unlink(tmpPath);
+    console.error("error while moving file to avatars", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
   module.exports = {
     register,
     login,
     current,
     logout,
-    subscriptionUpdate
+    subscriptionUpdate,
+    updateAvatar
   };
