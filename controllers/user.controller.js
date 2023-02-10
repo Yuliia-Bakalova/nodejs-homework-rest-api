@@ -148,12 +148,9 @@ async function verification(req, res, next) {
   return res.status(200).json({ message: "Verification successful" });
 }
 
-async function reverification(req, res, next) {
+async function reverifyEmail(req, res, next) {
   const { email } = req.body;
-  if (!email) {
-    return res.status(400).json({ message: "missing required field email" });
-  }
-
+  
   const user = await Users.findOne({
     email,
   });
@@ -183,5 +180,5 @@ async function reverification(req, res, next) {
     subscriptionUpdate,
     updateAvatar, 
     verification,
-    reverification
+    reverifyEmail
   };
