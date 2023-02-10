@@ -1,9 +1,10 @@
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET} = process.env;
 const multer = require("multer");
 const path = require("path");
 const Jimp = require("jimp");
 const { Users } = require("../models/users");
+
 
 function validateBody(schema) {
     return (req, res, next) => {
@@ -80,9 +81,12 @@ async function resizeAvatar(req, res, next) {
   next();
 }
 
+
+
 module.exports = {
   validateBody,
   auth,
   upload,
-  resizeAvatar
+  resizeAvatar,
+
 }
